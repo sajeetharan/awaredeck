@@ -1,0 +1,22 @@
+[package]
+name = "awaredeck"
+version = "0.1.0"
+description = "Context-aware AI action deck"
+authors = ["AwareDeck contributors"]
+edition = "2021"
+
+[lib]
+name = "awaredeck_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+keyring = { version = "3", features = ["windows-native", "apple-native", "sync-secret-service"] }
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tauri = { version = "2", features = [] }
+tauri-plugin-clipboard-manager = "2"
+url = "2"

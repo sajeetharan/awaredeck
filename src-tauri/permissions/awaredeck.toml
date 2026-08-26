@@ -1,0 +1,14 @@
+[[permission]]
+identifier = "allow-desktop-context"
+description = "Allows an explicit read of clipboard text for context capture."
+commands.allow = ["get_active_context"]
+
+[[permission]]
+identifier = "allow-provider-secrets"
+description = "Allows storing and deleting provider credentials in the OS credential vault."
+commands.allow = ["store_provider_secret", "delete_provider_secret"]
+
+[[permission]]
+identifier = "allow-provider-execution"
+description = "Allows a reviewed provider request using a credential from the OS vault."
+commands.allow = ["run_provider"]

@@ -19,6 +19,16 @@ npm run dev
 
 Open `http://localhost:5173`.
 
+## Run the desktop shell
+
+After installing Rust and the platform prerequisites:
+
+```bash
+npm run desktop:dev
+```
+
+The Tauri shell captures clipboard context through a permission-scoped native command and stores provider credentials in the operating system credential vault. See [desktop development](docs/DESKTOP.md) for setup, security boundaries, and build commands.
+
 ## Use the prototype
 
 1. Copy code or prose from any application and choose **Capture clipboard**.
@@ -41,6 +51,7 @@ npm run build
 
 - `src/domain`: provider-independent context, action ranking, risk, and execution rules.
 - `src/services`: replaceable context and AI-provider boundaries with mock implementations.
+- `src-tauri`: permission-scoped native commands, OS credential storage, and desktop packaging.
 - `src/App.tsx`: the React workbench and local interaction state.
 - `docs/PRD.md`: MVP definition, requirements, safety model, and milestones.
 

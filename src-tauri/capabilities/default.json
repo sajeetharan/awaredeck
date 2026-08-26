@@ -1,0 +1,12 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "desktop-default",
+  "description": "Minimal permissions for the AwareDeck desktop window",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "allow-desktop-context",
+    "allow-provider-secrets",
+    "allow-provider-execution"
+  ]
+}

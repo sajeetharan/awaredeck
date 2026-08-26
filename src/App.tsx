@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Activity, AppWindow, ArrowRight, BookOpen, Bot, Braces, Check, ChevronDown, ClipboardPaste, Clock3, Eye, FileCode2, History, KeyRound, LockKeyhole, Play, RefreshCw, Settings2, ShieldCheck, Sparkles, TriangleAlert, X } from 'lucide-react'
 import { executeAction, suggestActions, type DeckAction } from './domain/actions'
 import { contextFromClipboard, mockContext } from './services/contextSource'
+import { deleteDesktopProviderSecret, getDesktopContext, isDesktopRuntime, runDesktopProvider, storeDesktopProviderSecret } from './services/desktop'
 import { OpenAICompatibleProvider, PreviewProvider } from './services/provider'
 import './App.css'
 
@@ -37,6 +38,7 @@ function App() {
   const [endpoint, setEndpoint] = useState('https://api.openai.com/v1')
   const [model, setModel] = useState('gpt-4.1-mini')
   const [apiKey, setApiKey] = useState('')
+  const desktopRuntime = isDesktopRuntime()
   const selected = actions.find((action) => action.id === selectedId) ?? actions[0]
 
   const selectAction = (action: DeckAction) => {
@@ -56,9 +58,15 @@ function App() {
 
   const captureClipboard = async () => {
     try {
-      const selection = await navigator.clipboard.readText()
-      if (!selection.trim()) throw new Error('Clipboard does not contain text.')
-      setActiveContext(contextFromClipboard(selection), 'Clipboard context captured.')
+      if (desktopRuntime) {
+        const nextContext = await getDesktopContext()
+        if (!nextContext.selection.trim()) throw new Error('Clipboard does not contain text.')
+        setActiveContext(nextContext, 'Native desktop context captured.')
+      } else {
+        const selection = await navigator.clipboard.readText()
+        if (!selection.trim()) throw new Error('Clipboard does not contain text.')
+        setActiveContext(contextFromClipboard(selection), 'Clipboard context captured.')
+      }
     } catch (error) {
       setNotice(error instanceof Error ? error.message : 'Clipboard access was not available.')
     }
@@ -67,19 +75,32 @@ function App() {
   const runAction = async () => {
     try {
       executeAction(selected, approved)
-      if (providerMode === 'openai-compatible' && !apiKey.trim()) {
+      if (providerMode === 'openai-compatible' && !desktopRuntime && !apiKey.trim()) {
         throw new Error('Add a provider API key in settings before running.')
       }
 
       setRunning(true)
       setNotice('')
-      const provider = providerMode === 'preview'
-        ? new PreviewProvider()
-        : new OpenAICompatibleProvider({ endpoint, model, apiKey })
-      const response = await provider.run({ prompt: selected.prompt, context: context.selection })
+      const providerRequest = { prompt: selected.prompt, context: context.selection }
+      let providerName = 'Preview mode'
+      let response
+      if (providerMode === 'preview') {
+        response = await new PreviewProvider().run(providerRequest)
+      } else if (desktopRuntime) {
+        if (apiKey.trim()) {
+          await storeDesktopProviderSecret('openai-compatible', apiKey)
+          setApiKey('')
+        }
+        response = await runDesktopProvider({ providerId: 'openai-compatible', endpoint, model }, providerRequest)
+        providerName = 'Desktop provider'
+      } else {
+        const provider = new OpenAICompatibleProvider({ endpoint, model, apiKey })
+        response = await provider.run(providerRequest)
+        providerName = provider.name
+      }
       setResult(response.content)
       setHistory((entries) => [{ id: crypto.randomUUID(), label: selected.label, time: 'just now', status: 'Completed' }, ...entries])
-      setNotice(`${selected.label} completed with ${provider.name}.`)
+      setNotice(`${selected.label} completed with ${providerName}.`)
     } catch (error) {
       setNotice(error instanceof Error ? error.message : 'Action could not be completed.')
     } finally {
@@ -111,9 +132,10 @@ function App() {
         {providerMode === 'openai-compatible' && <>
           <label><span>Endpoint</span><input value={endpoint} onChange={(event) => setEndpoint(event.target.value)} /></label>
           <label><span>Model</span><input value={model} onChange={(event) => setModel(event.target.value)} /></label>
-          <label><span><KeyRound size={13} /> API key</span><input type="password" value={apiKey} onChange={(event) => setApiKey(event.target.value)} autoComplete="off" placeholder="Held in memory only" /></label>
+          <label><span><KeyRound size={13} /> API key</span><input type="password" value={apiKey} onChange={(event) => setApiKey(event.target.value)} autoComplete="off" placeholder={desktopRuntime ? 'Save to OS vault on run' : 'Held in memory only'} /></label>
+          {desktopRuntime && <button className="remove-secret-button" type="button" onClick={async () => { try { await deleteDesktopProviderSecret('openai-compatible'); setApiKey(''); setNotice('Saved provider credential removed.'); } catch (error) { setNotice(error instanceof Error ? error.message : 'Credential could not be removed.'); } }}>Remove saved key</button>}
         </>}
-        <p>Configuration is kept in this tab and is never written to disk.</p>
+        <p>{desktopRuntime ? 'Provider secrets are stored by the operating system credential vault.' : 'Configuration is kept in this tab and is never written to disk.'}</p>
       </section>}
 
       <section className="context-strip" aria-label="Active application context">
@@ -121,7 +143,7 @@ function App() {
         <div className="context-title"><span className="eyebrow">Active context</span><strong>{context.application}</strong><span>{context.title}</span></div>
         <div className="context-meta">
           <span>{context.language}</span><span>{context.selection.split(/\r?\n/).length} lines selected</span>
-          <button className="capture-button" type="button" onClick={captureClipboard}><ClipboardPaste size={16} /> Capture clipboard</button>
+          <button className="capture-button" type="button" onClick={captureClipboard}><ClipboardPaste size={16} /> {desktopRuntime ? 'Capture desktop' : 'Capture clipboard'}</button>
           <button className="icon-button" type="button" title="Reset context" aria-label="Reset context" onClick={() => setActiveContext(mockContext, 'Context reset.')}><RefreshCw size={17} /></button>
         </div>
       </section>

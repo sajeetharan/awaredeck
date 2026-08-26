@@ -15,6 +15,16 @@ npm run dev
 
 Open `http://localhost:5173`.
 
+## Use the prototype
+
+1. Copy code or prose from any application and choose **Capture clipboard**.
+2. Select one of the context-ranked actions.
+3. Review the full prompt and proposed effect.
+4. Approve the action when it can produce a write-oriented result, then choose **Run action**.
+5. Inspect the generated result and local activity history.
+
+Preview mode runs entirely in the browser. To call an OpenAI-compatible API, open the provider control, choose **OpenAI compatible**, and enter an endpoint, model, and API key. Provider configuration remains in memory for the current tab and is never persisted. Browser CORS policy must allow requests from the local app; production credential storage will be handled by the planned desktop shell.
+
 ## Quality checks
 
 ```bash
@@ -30,4 +40,4 @@ npm run build
 - `src/App.tsx`: the React workbench and local interaction state.
 - `docs/PRD.md`: MVP definition, requirements, safety model, and milestones.
 
-No provider credentials are needed. Execution is simulated locally in this prototype.
+No provider credentials are needed for preview mode. Generated write-oriented results are never applied automatically.

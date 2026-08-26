@@ -19,3 +19,15 @@ export class MockContextSource implements ContextSource {
     return mockContext
   }
 }
+
+export function contextFromClipboard(selection: string): ActiveContext {
+  const looksLikeCode = /(?:\b(?:const|let|function|class|import|export)\b|[{};]\s*$)/m.test(selection)
+
+  return {
+    application: 'Clipboard',
+    title: 'Captured selection',
+    contentType: looksLikeCode ? 'code' : 'text',
+    language: looksLikeCode ? 'Detected code' : 'Plain text',
+    selection,
+  }
+}

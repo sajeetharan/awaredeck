@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Activity, AppWindow, ArrowRight, Bot, Braces, Check, ChevronDown, ClipboardPaste, Clock3, Eye, FileCode2, History, KeyRound, LockKeyhole, Play, RefreshCw, Settings2, ShieldCheck, Sparkles, TriangleAlert, X } from 'lucide-react'
+import { Activity, AppWindow, ArrowRight, BookOpen, Bot, Braces, Check, ChevronDown, ClipboardPaste, Clock3, Eye, FileCode2, History, KeyRound, LockKeyhole, Play, RefreshCw, Settings2, ShieldCheck, Sparkles, TriangleAlert, X } from 'lucide-react'
 import { executeAction, suggestActions, type DeckAction } from './domain/actions'
 import { contextFromClipboard, mockContext } from './services/contextSource'
 import { OpenAICompatibleProvider, PreviewProvider } from './services/provider'
@@ -98,6 +98,7 @@ function App() {
         </a>
         <div className="topbar-actions">
           <span className="status"><span className="status-dot" /> Context live</span>
+          <a className="docs-link" href={`${import.meta.env.BASE_URL}docs/`}><BookOpen size={16} /> Docs</a>
           <button className="provider-button" type="button" onClick={() => setSettingsOpen((open) => !open)} aria-expanded={settingsOpen}>
             <Bot size={16} /> {providerMode === 'preview' ? 'Preview provider' : model} <ChevronDown size={15} />
           </button>

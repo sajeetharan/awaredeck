@@ -2,6 +2,10 @@
 
 AwareDeck is a context-aware AI action deck that suggests useful operations for the active application and selection. Its defining constraint is review before execution: prompts and effects are visible, and any action that writes or sends data requires explicit approval.
 
+[Live prototype](https://sajeetharan.github.io/awaredeck/) · [Documentation](https://sajeetharan.github.io/awaredeck/docs/) · [Issues](https://github.com/sajeetharan/awaredeck/issues)
+
+[![Deploy GitHub Pages](https://github.com/sajeetharan/awaredeck/actions/workflows/pages.yml/badge.svg)](https://github.com/sajeetharan/awaredeck/actions/workflows/pages.yml)
+
 This repository contains a browser-based product prototype. Desktop context capture is mocked behind an interface so it can later be implemented by a Tauri shell without changing domain logic.
 
 ## Run locally
